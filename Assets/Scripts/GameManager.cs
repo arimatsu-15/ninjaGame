@@ -33,6 +33,20 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private AudioSource[] sources;
+
+    public AudioClip anchor;
+    public AudioClip approach;
+    public AudioClip bgm;
+    public AudioClip finish;
+    public AudioClip leave;
+    public AudioClip nextPage;
+    public AudioClip shot;
+    public AudioClip start;
+    public AudioClip town;
+    public AudioClip wind;
+
+
     public LineRenderer line2;
 
     public GameObject player;     public GameObject kagiPrefab;     public GameObject kaginawaPrefab;
@@ -54,7 +68,7 @@ public class GameManager : MonoBehaviour
     public enum PLAYER_STATE     {         NOMAL,         THROW,         HIT,         JOINT,         STAY,     };
 
     public PLAYER_STATE playerState;      // Use this for initialization     void Start () {         playerState = PLAYER_STATE.NOMAL;
-        touchKagi = false;         deleteKagi = false;      } 
+        touchKagi = false;         deleteKagi = false;         sources = player.GetComponents<AudioSource>();     } 
 
 
     void Update()
@@ -99,13 +113,16 @@ public class GameManager : MonoBehaviour
             SyurikenShot(pointer);
         }*/
 
+
+
         if (playerState == PLAYER_STATE.NOMAL)
         {
-
+            _LaserPointerRenderer.SetPosition(0, player.transform.position);
             _LaserPointerRenderer.SetPosition(1, player.transform.position);
             touchKagi = false;
             if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger))
             {
+                sources[0].PlayOneShot(shot);
                 Shot(pointer);
                 playerState = PLAYER_STATE.THROW;
             }
@@ -123,11 +140,13 @@ public class GameManager : MonoBehaviour
             }
             if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger))
             {
+                sources[1].PlayOneShot(shot);
                 Destroy(kagiInstance);
                 Shot(pointer);
             }
             if (touchKagi == true)
             {
+                sources[2].PlayOneShot(anchor);
                 kagiInstance.GetComponent<kagiPrefab>().touchKagi = false;
                 kaginawaPos = kagiInstance.transform.position;
                 kagiApproachInstance = Instantiate(kagiApproachPrefab, kaginawaPos, new Quaternion(0, 0, 0, 0)) as GameObject;
@@ -136,6 +155,12 @@ public class GameManager : MonoBehaviour
             if (deleteKagi == true)
             {
                 kagiInstance.GetComponent<kagiPrefab>().deleteKagi = false;
+                Destroy(kagiInstance);
+                playerState = PLAYER_STATE.NOMAL;
+            }
+            if (OVRInput.GetDown(OVRInput.Button.PrimaryTouchpad))
+            {
+                Destroy(kagiApproachInstance);
                 Destroy(kagiInstance);
                 playerState = PLAYER_STATE.NOMAL;
             }
@@ -158,14 +183,18 @@ public class GameManager : MonoBehaviour
             playerPos = player.transform.position;
             distancePK = Vector3.Distance(playerPos, kaginawaPos);
             directionPK = (kaginawaPos - playerPos) / distancePK;//単位方向ベクトル
-
+            if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger))
+            {
+                sources[3].PlayOneShot(approach);
+            }
             if (OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger))
             {
                 Destroy(kagiInstance);
                 player.GetComponent<Rigidbody>().AddForce(directionPK * kaginawaPower);
             }
-            if (OVRInput.GetDown(OVRInput.Button.PrimaryTouchpad))
+            if (OVRInput.GetDown(OVRInput.Button.PrimaryTouchpad) || hikakuDirectionPK1<2)
             {
+                sources[4].PlayOneShot(leave);
                 Destroy(kagiApproachInstance);
                 Destroy(kagiInstance);
                 playerState = PLAYER_STATE.NOMAL;
@@ -177,16 +206,23 @@ public class GameManager : MonoBehaviour
             _LaserPointerRenderer.SetPosition(1, kaginawaPos);
             playerPos = player.transform.position;
             distancePK = Vector3.Distance(playerPos, kaginawaPos);
-            directionPK = (kaginawaPos - playerPos) / distancePK;           //単位方向ベクトル
+            directionPK = (kaginawaPos - playerPos) / distancePK; //単位方向ベクトル
+
+            if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger))
+            {
+                sources[5].PlayOneShot(approach);
+            }
             if (OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger))
             {
+
                 Destroy(kaginawaInstance);
                 player.GetComponent<Rigidbody>().AddForce(directionPK * kaginawaPower);
                 kagiApproachInstance = Instantiate(kagiApproachPrefab, kaginawaPos, new Quaternion(0, 0, 0, 0)) as GameObject;
                 playerState = PLAYER_STATE.HIT;
             }
-            if (OVRInput.GetDown(OVRInput.Button.PrimaryTouchpad))
+            if (OVRInput.GetDown(OVRInput.Button.PrimaryTouchpad) || hikakuDirectionPK1 < 2)
             {
+                sources[1].PlayOneShot(leave);
                 Destroy(kaginawaInstance);
                 playerState = PLAYER_STATE.NOMAL;
             } 
