@@ -93,10 +93,11 @@ public class GameManager : MonoBehaviour
 
         text.GetComponent<Text>().text = "playerState=" + playerState + "" + fps;
 
+        /*
         if (OVRInput.GetUp(OVRInput.Button.PrimaryTouchpad))
         {
             SyurikenShot(pointer);
-        }
+        }*/
 
         if (playerState == PLAYER_STATE.NOMAL)
         {
